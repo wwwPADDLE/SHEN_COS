@@ -1,0 +1,135 @@
+train_dataset:
+  dataset:
+    name: image-folder
+    args:
+      cache: none
+      split_key: train
+  wrapper:
+    name: train
+    args:
+      inp_size: 384
+      augment: false
+  batch_size: 1
+
+val_dataset:
+  dataset:
+    name: image-folder
+    args:
+      cache: none
+      split_key: test
+  wrapper:
+    name: val
+    args:
+      inp_size: 384
+  batch_size: 1
+
+test_dataset:
+  dataset:
+    name: image-folder
+    args:
+      cache: none
+      split_key: test
+  wrapper:
+    name: val
+    args:
+      inp_size: 384
+  batch_size: 1
+
+eval_type: cod
+
+data_norm:
+  inp:
+    sub: [0.485, 0.456, 0.406]
+    div: [0.229, 0.224, 0.225]
+  gt:
+    sub: [0.5]
+    div: [0.5]
+  gt_rgb:
+    sub: [0.5]
+    div: [0.5]
+
+model:
+  name: shen_cos_dinov3
+  args:
+    inp_size: 384
+    loss: iou
+    encoder_mode:
+      name: dinov3
+      backbone: dinov3_vitl16
+      img_size: 384
+      patch_size: 16
+      out_chans: 256
+      dinov3_repo_path: ./models/dinov3-main
+      weights: ./pretrained/dinov3_vitl16_pretrain_lvd1689m-8aa4cbdd.pth
+      freeze_backbone: true
+      prompt_embed_dim: 256
+      num_layers: 24
+      
+      spmam:
+        enable: true
+        num_blocks: 1
+        d_state: 16
+        d_conv: 4
+        expand: 2
+        bimamba_type: "v3"
+        detach_prompt: true
+        prompt_at_tail: false
+      
+      ifmfm:
+        enable: true
+        use_checkpoint: true
+        drop_path: 0.0
+        ssm_d_state: 16
+        ssm_ratio: 2.0
+        ssm_dt_rank: auto
+        ssm_conv: 3
+        ssm_conv_bias: true
+        ssm_drop_rate: 0.0
+        ssm_simple_init: false
+        directions: null
+
+      gfcm:
+        enable: true
+        layers: "all"
+        d_state: 16
+        d_conv: 4
+        expand: 2
+        num_blocks: 1
+        bimamba_type: "v3"
+        use_base_z: false
+        z_extra_mode: "big2d"
+        z_extra2d_ks: [3, 5]
+        z_extra2d_dilation: 1
+
+optimizer:
+  name: adamw
+  args:
+    lr: 0.0002
+lr_min: 1.0e-7
+epoch_max: 20
+
+multi_step_lr:
+  milestones: [1]
+  gamma: 0.1
+epoch_val: 2
+epoch_save: 1
+
+MAPLE_ALPHA_CLIP:
+  MODEL:
+    BACKBONE:
+      NAME: "ViT-L/14@336px"
+    CHECKPPOINT_BEST: ./pretrained/model-best.pth.tar
+
+  TRAINER:
+    MAPLE:
+      N_CTX: 4
+      CTX_INIT: "a photo of a"
+      PREC: "fp32"
+      PROMPT_DEPTH: 9
+
+  INPUT:
+    SIZE: [336, 336]
+    INTERPOLATION: "bicubic"
+    PIXEL_MEAN: [0.48145466, 0.4578275, 0.40821073]
+    PIXEL_STD:  [0.26862954, 0.26130258, 0.27577711]
+    TRANSFORMS: ["random_resized_crop", "random_flip", "normalize"]

@@ -1,0 +1,15 @@
+# datasets/ovcamo_info/splitted_ovcamo.yaml
+
+# 训练集（seen 14 类）
+OVCamo_TR_IMAGE_DIR: ./data/OVCamo/train/image
+OVCamo_TR_MASK_DIR:  ./data/OVCamo/train/mask
+# 仅训练用深度图（Stage-A 用不到，先保留占位）
+OVCamo_TR_DEPTH_DIR: ./data/OVCamo/train/depth
+
+# 测试集（unseen 61 类）
+OVCamo_TE_IMAGE_DIR: ./data/OVCamo/test/image
+OVCamo_TE_MASK_DIR:  ./data/OVCamo/test/mask
+
+# 元信息（随数据集提供）
+OVCamo_CLASS_JSON_PATH:  ./data/OVCamo/meta/class_info.json
+OVCamo_SAMPLE_JSON_PATH: ./data/OVCamo/meta/sample_info.json
